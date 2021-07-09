@@ -134,6 +134,15 @@ exports.bootcampPhotoUpload = asyncHandler(async (req, res, next) => {
 			new ErrorResponse(`Bootcamp not found with id of ${req.params.id}`, 404)
 		);
 	}
+	//Make sure user is bootcamp owner
+	if (bootcamp.user.toString() !== req.user.id && req.user.role !== 'admin') {
+		return next(
+			new ErrorResponse(
+				`User ${req.user.id} is not authorized to upload photo in this bootcamp`,
+				401
+			)
+		);
+	}
 	if (!req.files) {
 		return next(new ErrorResponse(`Please upload a file`, 400));
 	}
@@ -151,19 +160,12 @@ exports.bootcampPhotoUpload = asyncHandler(async (req, res, next) => {
 		);
 	//create custom filename
 	file.name = `photo_${bootcamp._id}${path.parse(file.name).ext}`;
-	file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async err => {
+	file.mv(`${process.env.FILE_UPLOAD_PATH}/${file.name}`, async (err) => {
 		if (err) {
-			console.error(err)
-			return next(
-				new ErrorResponse(
-					`Problem with file upload`,
-					500
-				)
-			);
+			console.error(err);
+			return next(new ErrorResponse(`Problem with file upload`, 500));
 		}
-		await Bootcamp.findByIdAndUpdate(req.params.id, { photo: file.name })
-		res
-			.status(200)
-			.json({ success: true, date:file.name});
+		await Bootcamp.findByIdAndUpdate(req.params.id, { photo: file.name });
+		res.status(200).json({ success: true, date: file.name });
 	});
 });
