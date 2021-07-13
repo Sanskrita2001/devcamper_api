@@ -17,7 +17,8 @@ connectDb();
 //Route files
 const bootcamps = require('./routes/bootcamp');
 const courses = require('./routes/courses');
-const auth = require('./routes/auth')
+const auth = require('./routes/auth');
+const users = require('./routes/users');
 
 const app = express();
 
@@ -25,7 +26,7 @@ const app = express();
 app.use(express.json());
 
 //Cookie parser
-app.use(cookieParser())
+app.use(cookieParser());
 
 //Dev logging Middleware
 if (process.env.NODE_ENV === 'development') {
@@ -36,12 +37,13 @@ if (process.env.NODE_ENV === 'development') {
 app.use(fileupload());
 
 //Set static folder
-app.use(express.static(path.join(__dirname,'public')))
+app.use(express.static(path.join(__dirname, 'public')));
 
 //Mount routers
 app.use('/api/v1/bootcamps', bootcamps);
 app.use('/api/v1/courses', courses);
-app.use('/api/v1/auth',auth)
+app.use('/api/v1/auth', auth);
+app.use('/api/v1/users', users);
 
 app.use(errorHandler);
 
